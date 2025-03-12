@@ -1,0 +1,163 @@
+.homePage {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Адаптивная сетка для услуг */
+  .serviceGrid {
+    display: grid;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  /* На мобильных устройствах (1 столбец) */
+  @media (max-width: 599px) {
+    .serviceGrid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+    button {
+      padding: 12px 10px;
+    }
+  }
+  
+  /* На планшетах (2 столбца) */
+  @media (min-width: 600px) and (max-width: 899px) {
+    .serviceGrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    button {
+      padding: 12px 45px;
+    }
+  }
+  
+  /* На десктопах (3 столбца) */
+  @media (min-width: 900px) {
+    .serviceGrid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    button {
+      padding: 12px 45px;
+    }
+  }
+  
+  /* Стили для карточек услуг */
+  .serviceCard {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .serviceCard:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-5px);
+  }
+  
+  .serviceCard h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #8c00ff;
+  }
+  
+  .serviceCard p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  /* Стили для модального окна */
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  
+  .modalContent {
+    background-color: rgb(255, 255, 255);
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    max-height: 90vh;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  }
+  
+
+  @media (max-width: 599px) {
+    .modalContent {
+      width: 90%;
+      padding: 15px;
+    }
+  
+    .formField input {
+      font-size: 14px; 
+    }
+  
+    .formActions button {
+      padding: 10px 15px; 
+      font-size: 14px;
+    }
+  }
+  
+  .formmod {
+    padding: 0 10px;
+    align-items: normal;
+  }
+  
+  .formField {
+    margin-bottom: 15px;
+  }
+  
+  .formField label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .formField input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .formActions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .formActions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .formActions button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .formActions button[type="submit"]:hover {
+    background-color: #218838;
+  }
+  
+  .formActions button[type="button"] {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .formActions button[type="button"]:hover {
+    background-color: #c82333;
+  }
