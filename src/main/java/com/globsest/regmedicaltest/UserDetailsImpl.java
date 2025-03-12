@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -14,17 +15,28 @@ import java.util.List;
 public class UserDetailsImpl implements UserDetails {
 
     private Long id;
-    private String snils;
+    private String passport;
+    private String firstName;
+    private String lastName;
     private String email;
     private String password;
+    private String snils;
+    private Date birthDate;
+
 
 
     public static UserDetailsImpl build(User user) {
         return new UserDetailsImpl(
                 user.getId(),
-                user.getSnils(),
+                user.getPassport(),
+                user.getFirstName(),
+                user.getLastName(),
                 user.getEmail(),
-                user.getPassword());
+                user.getPassword(),
+                user.getSnils(),
+                user.getBirthDate()
+        );
+
     }
 
     @Override

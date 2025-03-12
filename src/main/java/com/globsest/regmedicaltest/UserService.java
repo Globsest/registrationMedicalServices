@@ -20,7 +20,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findBySnils(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        User user = userRepository.findByPassport(username).orElseThrow(() -> new UsernameNotFoundException(username));
 
         return UserDetailsImpl.build(user);
     }

@@ -35,7 +35,6 @@ public class SecurityController {
         this.authenticationManager = authenticationManager;
     }
 
-
     @Autowired
     public void setJwtCore(JWTCore jwtCore) {
         this.jwtCore = jwtCore;
@@ -49,20 +48,27 @@ public class SecurityController {
         if (userRepository.existsBySnils(signupRequest.getSnils())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        if (userRepository.existsByPassport(signupRequest.getPassport())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         User user = new User();
+        user.setPassport(signupRequest.getPassport());
+        user.setFirstName(signupRequest.getFirstName());
+        user.setLastName(signupRequest.getLastName());
         user.setEmail(signupRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         user.setSnils(signupRequest.getSnils());
+        user.setBirthDate(signupRequest.getBirthDate());
         userRepository.save(user);
-        return ResponseEntity.ok("AllGood");
+        return ResponseEntity.ok("User created successfully");
     }
 
     @PostMapping("/signin")
     ResponseEntity<?> signin(@RequestBody SigninRequest signinRequest) {
         Authentication authentication = null;
         try {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getSnils(), signinRequest.getPassword()));
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getPassport(), signinRequest.getPassword()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
