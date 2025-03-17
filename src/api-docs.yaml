@@ -1,0 +1,110 @@
+openapi: 3.0.1
+
+info:
+  title: Медицинское веб-приложение
+  version: 1.0.0
+  description: API для взаимодействия с медицинскими услугами
+
+
+paths:
+  /api/auth/register:
+    post:
+      summary: Регистрация пользователя
+      description: Регистрация нового пользователя в системе.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Пользователь успешно зарегистрирован
+
+  /api/auth/login:
+    post:
+      summary: Авторизация пользователя
+      description: Вход пользователя в систему.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Успешный вход
+
+  /api/services:
+    get:
+      summary: Получение списка медицинских услуг
+      description: Возвращает список всех доступных медицинских услуг.
+      responses:
+        '200':
+          description: Список услуг успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: Уникальный идентификатор услуги
+                    name:
+                      type: string
+                      description: Название услуги
+                    fields:
+                      type: array
+                      items:
+                        type: string
+                      description: Поля, которые необходимо заполнить для оформления услуги
+                    description:
+                      type: string
+                      description: Описание услуги
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /api/form/submit:
+    post:
+      summary: Отправка формы
+      description: Отправка данных формы для генерации PDF. Форма динамическая, поля зависят от выбранной услуги.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceId:
+                  type: integer
+                  description: Идентификатор выбранной услуги
+                fields:
+                  type: object
+                  additionalProperties: true
+                  description: Динамические поля формы, зависящие от услуги
+              example:
+                serviceId: 1
+                fields:
+                  Паспорт: "1234 567890"
+                  Имя: "Иван"
+                  Фамилия: "Иванов"
+                  Полис: "123456789"
+                  Направление врача: "Доктор Петров"
+                  Область исследования: "Грудная клетка"
+      responses:
+        '200':
+          description: Форма успешно отправлена

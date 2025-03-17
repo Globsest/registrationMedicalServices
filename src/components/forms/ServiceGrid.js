@@ -1,6 +1,8 @@
 import React from "react";
 import "../../styles/HomePage.css";
 
+
+
 const ServiceGrid = ({ services, onSelect }) => {
   return (
     <div className="serviceGrid">

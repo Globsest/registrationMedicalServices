@@ -1,4 +1,5 @@
 import React from 'react';
+import { registerUser } from '../../services/api.js';
 
 function RegisterForm() {
   const [state, setState] = React.useState({
@@ -14,13 +15,24 @@ function RegisterForm() {
     });
   };
 
-  const handleOnSubmit = evt => {
+  const handleOnSubmit = async (evt) => {
     evt.preventDefault();
 
     const { name, email, password } = state;
-    alert(
-      `name: ${name} email: ${email} password: ${password}`
-    );
+    
+    try {
+      const response = await registerUser({ name, email, password });
+      alert('Регистрация прошла успешно!');
+      console.log('Регистрация:', response.data);
+    } 
+    catch (error) {
+      console.error('Ошибка регистрации:', error);
+      alert('Ошибка регистрации. Пожалуйста, попробуйте снова.');
+    }
+    
+    // alert(
+    //   `name: ${name} email: ${email} password: ${password}`
+    // );
 
     for (const key in state) {
       setState({

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../styles/HomePage.css";
+import { submitForm } from '../../services/api.js';
 
 const DynamicForm = ({ service, onClose }) => {
   const [formData, setFormData] = useState({});
@@ -10,11 +11,21 @@ const DynamicForm = ({ service, onClose }) => {
   };
 
   // Обработчик отправки формы
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Данные формы:", formData);
-    alert("Форма успешно отправлена!");
-    onClose();
+    try {
+      const response = await submitForm({ serviceId: service.id, ...formData });
+      alert("Форма успешно отправлена!");
+      console.log('Форма отправлена:', response.data);
+      onClose();
+    } 
+    catch (error) {
+      console.error('Ошибка отправки формы:', error);
+      alert('Ошибка отправки формы. Пожалуйста, попробуйте снова.');
+    }
+    // alert("Форма успешно отправлена!");
+    // onClose();
   };
 
   return (
