@@ -1,4 +1,4 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.controller;
 
 
 import org.springframework.web.bind.annotation.GetMapping;

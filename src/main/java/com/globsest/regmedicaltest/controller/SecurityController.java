@@ -1,5 +1,10 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.controller;
 
+import com.globsest.regmedicaltest.JWTCore;
+import com.globsest.regmedicaltest.SigninRequest;
+import com.globsest.regmedicaltest.SignupRequest;
+import com.globsest.regmedicaltest.entity.User;
+import com.globsest.regmedicaltest.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +45,7 @@ public class SecurityController {
         this.jwtCore = jwtCore;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -64,7 +69,7 @@ public class SecurityController {
         return ResponseEntity.ok("User created successfully");
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     ResponseEntity<?> signin(@RequestBody SigninRequest signinRequest) {
         Authentication authentication = null;
         try {

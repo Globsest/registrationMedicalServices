@@ -1,5 +1,8 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.service;
 
+import com.globsest.regmedicaltest.UserDetailsImpl;
+import com.globsest.regmedicaltest.entity.User;
+import com.globsest.regmedicaltest.repository.UserRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

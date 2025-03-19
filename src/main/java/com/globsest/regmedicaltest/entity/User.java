@@ -1,4 +1,4 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
