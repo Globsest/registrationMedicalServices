@@ -27,6 +27,14 @@ paths:
       responses:
         '200':
           description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 123
 
   /api/auth/login:
     post:
@@ -46,6 +54,14 @@ paths:
       responses:
         '200':
           description: Успешный вход
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                    example: 123
 
   /api/services:
     get:
@@ -89,15 +105,22 @@ paths:
             schema:
               type: object
               properties:
-                serviceId:
+                user_id:
+                  type: integer
+                  description: Идентификатор пользователя
+                service_id:
                   type: integer
                   description: Идентификатор выбранной услуги
                 fields:
                   type: object
                   additionalProperties: true
                   description: Динамические поля формы, зависящие от услуги
+                created_at:
+                  type: string
+                  description: Дата и время отправки формы 
               example:
-                serviceId: 1
+                user_id: 123
+                service_id: 1
                 fields:
                   Паспорт: "1234 567890"
                   Имя: "Иван"
@@ -105,6 +128,7 @@ paths:
                   Полис: "123456789"
                   Направление врача: "Доктор Петров"
                   Область исследования: "Грудная клетка"
+                created_at: "05.10.2023, 14:48:00"
       responses:
         '200':
           description: Форма успешно отправлена

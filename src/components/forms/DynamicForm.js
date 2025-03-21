@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import "../../styles/HomePage.css";
 import { submitForm } from '../../services/api.js';
+import { useSelector } from 'react-redux';
 
 const DynamicForm = ({ service, onClose }) => {
   const [formData, setFormData] = useState({});
+  const userID = useSelector((state) => state.auth.userID); 
+
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleString();
 
   // Обработчик изменения полей формы
   const handleInputChange = (field, value) => {
@@ -15,7 +20,7 @@ const DynamicForm = ({ service, onClose }) => {
     e.preventDefault();
     console.log("Данные формы:", formData);
     try {
-      const response = await submitForm({ serviceId: service.id, ...formData });
+      const response = await submitForm({ user_id: userID, service_id: service.id, ...formData, created_at: formattedDate});
       alert("Форма успешно отправлена!");
       console.log('Форма отправлена:', response.data);
       onClose();

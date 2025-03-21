@@ -1,12 +1,16 @@
 import React from "react";
 import { loginUser } from '../../services/api.js';
-
+import { useDispatch } from 'react-redux';
+import { setUserID } from '../../redux/authSlice';
 
 function LoginForm() {
   const [state, setState] = React.useState({
     email: "",
     password: ""
   });
+
+  const dispatch = useDispatch();
+
   const handleChange = evt => {
     const value = evt.target.value;
     setState({
@@ -22,6 +26,8 @@ function LoginForm() {
     
     try {
       const response = await loginUser({ email, password });
+      const userID = response.data.user_id;
+      dispatch(setUserID(userID));
       alert('Вход выполнен успешно!');
       console.log('Авторизация:', response.data);
     } 

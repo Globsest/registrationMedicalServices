@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import './styles/global.css';
 
+
 const App = () => {
   return (
     <Router>
