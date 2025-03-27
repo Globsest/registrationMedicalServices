@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ServiceFormRepository extends JpaRepository<ServiceForm,Long> {
     List<ServiceForm> findByMedicalService_ServiceId(Long service_id);
+
 }

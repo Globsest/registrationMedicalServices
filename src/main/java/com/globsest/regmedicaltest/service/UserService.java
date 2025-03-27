@@ -23,7 +23,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByPassport(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        User user = userRepository.findByPassport(username);
 
         return UserDetailsImpl.build(user);
     }
