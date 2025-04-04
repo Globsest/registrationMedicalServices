@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "MedicalServices")
+@Table(name = "medical_service")
 public class MedicalServices {
 
     @Id

@@ -24,9 +24,9 @@ public class MedicalServiceService {
         return medicalServicesRepository.findByIsActiveTrue();
     }
 
-    public List<ServiceForm> getServiceByMedicalService(Long service_id) {
-        return serviceFormRepository.findByMedicalService_ServiceId(service_id);
-    }
+//    public List<ServiceForm> getServiceByMedicalService(Long service_id) {
+//        return serviceFormRepository.findByMedicalService_ServiceId(service_id);
+//    }
 
 
 }

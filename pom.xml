@@ -90,6 +90,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-gradle-plugin</artifactId>
+            <version>5.6.15.Final</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>

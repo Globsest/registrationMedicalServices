@@ -5,6 +5,7 @@ import com.globsest.regmedicaltest.SigninRequest;
 import com.globsest.regmedicaltest.SignupRequest;
 import com.globsest.regmedicaltest.entity.User;
 import com.globsest.regmedicaltest.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class SecurityController {
@@ -48,13 +50,13 @@ public class SecurityController {
     @PostMapping("/register")
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FOUND).build();
         }
         if (userRepository.existsBySnils(signupRequest.getSnils())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FOUND).build();
         }
         if (userRepository.existsByPassport(signupRequest.getPassport())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.FOUND).build();
         }
 
         User user = new User();

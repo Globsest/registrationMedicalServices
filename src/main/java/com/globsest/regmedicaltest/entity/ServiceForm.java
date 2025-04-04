@@ -19,4 +19,7 @@ public class ServiceForm {
 
     @Column(name = "form_struct", columnDefinition = "JSONB")
     private String formStruct;
+
+    @Column(name = "pdf_template")
+    private String pdf_template;
 }
