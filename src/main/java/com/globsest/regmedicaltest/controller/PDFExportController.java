@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -44,7 +42,18 @@ public class PDFExportController {
         User user = userRepository.findById(record.getUser().getId()).orElseThrow();
         ServiceForm form = (ServiceForm) serviceFormRepository.findByMedicalService_ServiceId(record.getServices().getServiceId());
 
-        Map<String, Object> formData = objectMapper.readValue(record.getFormData(), Map.class);
+        List<String> userData = objectMapper.readValue(record.getFormData(), List.class);
+        List<String> fieldNames = objectMapper.readValue(form.getFormStruct(), List.class);
+        Map<String, String> formData = new LinkedHashMap<>();
+
+        for (int i = 0; i < fieldNames.size(); i++) {
+            String value = i < userData.size() ? userData.get(i) : "";
+            formData.put(fieldNames.get(i), value);
+        }
+
+        //Map<String, Object> formData = objectMapper.readValue(record.getFormData(), Map.class);
+
+
 
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "filename=\"medical_form_"+recordId+".pdf\"");

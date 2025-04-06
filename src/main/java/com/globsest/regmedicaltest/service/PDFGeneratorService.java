@@ -6,9 +6,11 @@ import com.globsest.regmedicaltest.entity.ServiceForm;
 import com.globsest.regmedicaltest.entity.User;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
+import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,27 +19,31 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.Map;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PDFGeneratorService {
 
     private final ObjectMapper objectMapper;
-
+    private Font baseFont;
+    private Font boldFont;
 
     public void export(HttpServletResponse response,
                        ServiceForm serviceForm,
                        User user,
-                       Map<String, Object> formData) throws IOException {
+                       Map<String, String> formData) throws IOException {
 
         Document document = new Document(PageSize.A4);
         PdfWriter pdfWriter = PdfWriter.getInstance(document, response.getOutputStream());
 
         document.open();
-
+        document.addTitle("Медицинская карта");
 
         addUserInfo(document, user);
         addServiceInfo(document, serviceForm);
-        addFormData(document, serviceForm.getFormStruct(), formData);
+        addFormData(document, formData);
         document.close();
 
     }
@@ -61,16 +67,14 @@ public class PDFGeneratorService {
 
 
     private void addTableRow(PdfPTable table, String label, String value) {
-        Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10);
+            PdfPCell labelCell = new PdfPCell(new Phrase(label, boldFont));
+            labelCell.setBorderWidth(0.5f);
 
-        PdfPCell labelCell = new PdfPCell(new Phrase(label, boldFont));
-        labelCell.setBorderWidth(0.5f);
+            PdfPCell valueCell = new PdfPCell(new Phrase(value));
+            valueCell.setBorderWidth(0.5f);
 
-        PdfPCell valueCell = new PdfPCell(new Phrase(value));
-        valueCell.setBorderWidth(0.5f);
-
-        table.addCell(labelCell);
-        table.addCell(valueCell);
+            table.addCell(labelCell);
+            table.addCell(valueCell);
     }
 
     private void addServiceInfo(Document document, ServiceForm serviceForm) throws DocumentException {
@@ -79,8 +83,7 @@ public class PDFGeneratorService {
         table.setSpacingBefore(15f);
         table.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-        PdfPCell headerCell = new PdfPCell(new Phrase("Информация об услуге",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+        PdfPCell headerCell = new PdfPCell(new Phrase("Услуга", new Font(baseFont.getBaseFont(), 12)));
         headerCell.setColspan(2);
         headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         headerCell.setBackgroundColor(new Color(220, 220, 220));
@@ -91,33 +94,39 @@ public class PDFGeneratorService {
         document.add(table);
     }
 
-    private void addFormData(Document document, String formStructJson, Map<String, Object> formData)
+    private void addFormData(Document document, Map<String, String> formData)
             throws DocumentException, IOException {
-
-        JsonNode formStructure = objectMapper.readTree(formStructJson);
-        JsonNode fields = formStructure.path("fields");
 
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(90);
         table.setSpacingBefore(15f);
         table.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-        PdfPCell headerCell = new PdfPCell(new Phrase("Данные формы",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+        // Заголовок раздела
+        PdfPCell headerCell = new PdfPCell(new Phrase("Информация об услуге", new Font(baseFont.getBaseFont(), 12)));
         headerCell.setColspan(2);
         headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
         headerCell.setBackgroundColor(new Color(220, 220, 220));
         table.addCell(headerCell);
+        System.out.println(formData);
 
-        fields.forEach(field -> {
-            String fieldName = field.path("name").asText();
-            String fieldLabel = field.path("label").asText(fieldName);
-            Object value = formData.get(fieldName);
-
-            addTableRow(table, fieldLabel, value != null ? value.toString() : "Не указано");
-        });
+        for (Map.Entry<String, String> entry : formData.entrySet()) {
+            addTableRow(table, entry.getKey(), entry.getValue());
+        }
 
         document.add(table);
     }
 
+    @PostConstruct
+    public void initFonts() throws DocumentException, IOException {
+        // Путь к шрифтам в resources (arial.ttf и arialbd.ttf должны быть в src/main/resources/fonts)
+        String regularFontPath = "/fonts/arialmt.ttf";
+        String boldFontPath = "/fonts/arial_bolditalicmt.ttf";
+
+        BaseFont base = BaseFont.createFont(regularFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        BaseFont bold = BaseFont.createFont(boldFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+
+        this.baseFont = new Font(base, 10);
+        this.boldFont = new Font(bold, 10);
+    }
 }

@@ -17,6 +17,7 @@ public class ServiceForm {
     @JoinColumn(name = "service_id", nullable = false)
     private MedicalServices medicalService;
 
+
     @Column(name = "form_struct", columnDefinition = "JSONB")
     private String formStruct;
 
