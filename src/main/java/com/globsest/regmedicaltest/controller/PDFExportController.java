@@ -58,6 +58,6 @@ public class PDFExportController {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "filename=\"medical_form_"+recordId+".pdf\"");
 
-        this.pdfGeneratorService.export(response,form,user,formData);
+        this.pdfGeneratorService.export(response,form,user,formData, record);
     }
 }
