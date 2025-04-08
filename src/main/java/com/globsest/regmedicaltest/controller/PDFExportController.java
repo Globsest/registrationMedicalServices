@@ -1,5 +1,6 @@
 package com.globsest.regmedicaltest.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.globsest.regmedicaltest.entity.ServiceForm;
 import com.globsest.regmedicaltest.entity.User;
@@ -42,17 +43,10 @@ public class PDFExportController {
         User user = userRepository.findById(record.getUser().getId()).orElseThrow();
         ServiceForm form = (ServiceForm) serviceFormRepository.findByMedicalService_ServiceId(record.getServices().getServiceId());
 
-        List<String> userData = objectMapper.readValue(record.getFormData(), List.class);
-        List<String> fieldNames = objectMapper.readValue(form.getFormStruct(), List.class);
-        Map<String, String> formData = new LinkedHashMap<>();
-
-        for (int i = 0; i < fieldNames.size(); i++) {
-            String value = i < userData.size() ? userData.get(i) : "";
-            formData.put(fieldNames.get(i), value);
-        }
-
-        //Map<String, Object> formData = objectMapper.readValue(record.getFormData(), Map.class);
-
+        Map<String, Object> formData = objectMapper.readValue(
+                record.getFormData(),
+                new TypeReference<Map<String, Object>>() {}
+        );
 
 
         response.setContentType("application/pdf");

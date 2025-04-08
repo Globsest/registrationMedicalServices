@@ -45,7 +45,7 @@ public class PDFGeneratorService {
     public void export(HttpServletResponse response,
                        ServiceForm serviceForm,
                        User user,
-                       Map<String, String> formData,
+                       Map<String, Object> formData,
                        UserRecords record) throws IOException {
 
         Document document = new Document(PageSize.A4);
@@ -221,7 +221,7 @@ public class PDFGeneratorService {
     }
 
 
-    private void addFormData(Document document, Map<String, String> formData)
+    private void addFormData(Document document, Map<String, Object> formData)
             throws DocumentException, IOException {
 
         PdfPTable table = new PdfPTable(2);
@@ -229,7 +229,6 @@ public class PDFGeneratorService {
         table.setSpacingBefore(15f);
         table.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-        // Заголовок раздела
         PdfPCell headerCell = new PdfPCell(new Phrase("Информация об услуге", new Font(baseFont.getBaseFont(), 12)));
         headerCell.setColspan(2);
         headerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -237,8 +236,9 @@ public class PDFGeneratorService {
         table.addCell(headerCell);
         System.out.println(formData);
 
-        for (Map.Entry<String, String> entry : formData.entrySet()) {
-            addTableRow(table, entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry : formData.entrySet()) {
+            String value = entry.getValue() != null ? entry.getValue().toString() : "";
+            addTableRow(table, entry.getKey(), value);
         }
 
         document.add(table);
