@@ -1,8 +1,11 @@
 package com.globsest.regmedicaltest.controller;
 
-import com.globsest.regmedicaltest.JWTCore;
-import com.globsest.regmedicaltest.SigninRequest;
-import com.globsest.regmedicaltest.SignupRequest;
+import com.globsest.regmedicaltest.dto.AuthResponse;
+import com.globsest.regmedicaltest.dto.RefreshRequest;
+import com.globsest.regmedicaltest.service.UserService;
+import com.globsest.regmedicaltest.token.JWTCore;
+import com.globsest.regmedicaltest.dto.LoginRequest;
+import com.globsest.regmedicaltest.dto.RegisterRequest;
 import com.globsest.regmedicaltest.entity.User;
 import com.globsest.regmedicaltest.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +32,7 @@ public class SecurityController {
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private JWTCore jwtCore;
+    private UserService userService;
 
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
@@ -48,41 +53,74 @@ public class SecurityController {
     }
 
     @PostMapping("/register")
-    ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+    ResponseEntity<?> signup(@RequestBody RegisterRequest registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
             return ResponseEntity.status(HttpStatus.FOUND).build();
         }
-        if (userRepository.existsBySnils(signupRequest.getSnils())) {
+        if (userRepository.existsBySnils(registerRequest.getSnils())) {
             return ResponseEntity.status(HttpStatus.FOUND).build();
         }
-        if (userRepository.existsByPassport(signupRequest.getPassport())) {
+        if (userRepository.existsByPassport(registerRequest.getPassport())) {
             return ResponseEntity.status(HttpStatus.FOUND).build();
         }
 
         User user = new User();
-        user.setPassport(signupRequest.getPassport());
-        user.setFirstName(signupRequest.getFirstName());
-        user.setLastName(signupRequest.getLastName());
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        user.setSnils(signupRequest.getSnils());
-        user.setBirthDate(signupRequest.getBirthDate());
+        user.setPassport(registerRequest.getPassport());
+        user.setFirstName(registerRequest.getFirstName());
+        user.setLastName(registerRequest.getLastName());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setSnils(registerRequest.getSnils());
+        user.setBirthDate(registerRequest.getBirthDate());
         userRepository.save(user);
         return ResponseEntity.ok("User created successfully");
     }
 
     @PostMapping("/login")
-    ResponseEntity<?> signin(@RequestBody SigninRequest signinRequest) {
-        Authentication authentication = null;
-        try {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getPassport(), signinRequest.getPassword()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getPassport(),
+                        loginRequest.getPassword()
+                )
+        );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtCore.generateToken(authentication);
-        return ResponseEntity.ok(jwt);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        String accessToken = jwtCore.generateAccessToken(userDetails);
+        String refreshToken = jwtCore.generateRefreshToken(userDetails);
+
+        return ResponseEntity.ok(new AuthResponse(
+                accessToken,
+                refreshToken,
+                userDetails.getUsername()
+        ));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody RefreshRequest refreshRequest) {
+        if (!jwtCore.validateToken(refreshRequest.getRefreshToken(), true)) {
+            return ResponseEntity.badRequest().body("Invalid refresh token");
+        }
+
+        String passport = jwtCore.getUsernameFromToken(refreshRequest.getRefreshToken(), true);
+        UserDetails userDetails = userService.loadUserByUsername(passport);
+
+        String newAccessToken = jwtCore.generateAccessToken(userDetails);
+        String newRefreshToken = jwtCore.generateRefreshToken(userDetails);
+
+        return ResponseEntity.ok(new AuthResponse(
+                newAccessToken,
+                newRefreshToken,
+                userDetails.getUsername()
+        ));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logout successful");
     }
 
 }

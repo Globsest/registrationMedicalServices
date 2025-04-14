@@ -1,4 +1,4 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.token;
 
 
 import com.globsest.regmedicaltest.service.UserService;
@@ -23,8 +23,11 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfigurator {
 
     private UserService userService;
+    private final TokenFilter tokenFilter;
 
-    public SecurityConfigurator() {}
+    public SecurityConfigurator(TokenFilter tokenFilter) {
+        this.tokenFilter = tokenFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -35,12 +38,6 @@ public class SecurityConfigurator {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return  authenticationConfiguration.getAuthenticationManager();
     }
-
-//    @Bean
-//    public AuthenticationManagerBuilder configureAuthenticationManagerBuilder(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//        authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(passwordEncoder());
-//        return authenticationManagerBuilder;
-//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, TokenFilter tokenFilter) throws Exception {
@@ -64,4 +61,9 @@ public class SecurityConfigurator {
 
     }
 
+//    @Bean
+//    public AuthenticationManagerBuilder configureAuthenticationManagerBuilder(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+//        authenticationManagerBuilder.userDetailsService(userService).passwordEncoder(passwordEncoder());
+//        return authenticationManagerBuilder;
+//    }
 }

@@ -1,6 +1,6 @@
 package com.globsest.regmedicaltest.service;
 
-import com.globsest.regmedicaltest.UserDetailsImpl;
+import com.globsest.regmedicaltest.entity.UserDetailsImpl;
 import com.globsest.regmedicaltest.entity.User;
 import com.globsest.regmedicaltest.repository.UserRepository;
 import lombok.Data;

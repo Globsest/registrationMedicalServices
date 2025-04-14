@@ -1,11 +1,11 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.dto;
 
 import lombok.Data;
 
 import java.util.Date;
 
 @Data
-public class SignupRequest {
+public class RegisterRequest {
 
     private String passport;
     private String firstName;

@@ -1,9 +1,9 @@
-package com.globsest.regmedicaltest;
+package com.globsest.regmedicaltest.dto;
 
 import lombok.Data;
 
 @Data
-public class SigninRequest {
+public class LoginRequest {
     private String passport;
     private String password;
 }
