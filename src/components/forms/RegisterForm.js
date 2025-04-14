@@ -1,85 +1,130 @@
-import React from 'react';
-import { registerUser } from '../../services/api.js';
-import { useDispatch } from 'react-redux';
-import { setUserID } from '../../redux/authSlice';
+"use client"
+
+import React, { useState } from "react"
+import { registerUser, loginUser } from "../../services/api.js"
+import { useDispatch } from "react-redux"
+import { setUserID } from "../../redux/authSlice"
 
 function RegisterForm() {
   const [state, setState] = React.useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
-    password: ""
-  });
+    password: "",
+    passport: "",
+    snils: "",
+    birthDate: "",
+  })
 
-  const dispatch = useDispatch();
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
-  const handleChange = evt => {
-    const value = evt.target.value;
+  const dispatch = useDispatch()
+
+  const handleChange = (evt) => {
+    const value = evt.target.value
     setState({
       ...state,
-      [evt.target.name]: value
-    });
-  };
+      [evt.target.name]: value,
+    })
+  }
 
   const handleOnSubmit = async (evt) => {
-    evt.preventDefault();
+    evt.preventDefault()
 
-    const { name, email, password } = state;
-    
+    const { firstName, lastName, email, password, passport, snils, birthDate } = state
+
     try {
-      const response = await registerUser({ name, email, password });
-      const userID = response.data.user_id;
-      dispatch(setUserID(userID));
-      alert('Регистрация прошла успешно!');
-      console.log('Регистрация:', response.data);
-    } 
-    catch (error) {
-      console.error('Ошибка регистрации:', error);
-      alert('Ошибка регистрации. Пожалуйста, попробуйте снова.');
+      const response = await registerUser({ firstName, lastName, email, password, passport, snils, birthDate })
+      console.log("Registration response:", response)
+
+      setSuccessMessage("Регистрация прошла успешно!")
+
+      // After successful registration, login the user
+      try {
+        const loginResponse = await loginUser({ passport, password })
+        console.log("Auto-login response:", loginResponse)
+
+        // Store the JWT token
+        if (loginResponse.data) {
+          localStorage.setItem("token", loginResponse.data)
+
+          // Set a dummy user ID since we don't have one from the response
+          dispatch(setUserID(passport))
+
+          // Redirect to home page
+          window.location.href = "/"
+        }
+      } catch (loginError) {
+        console.error("Ошибка автоматического входа:", loginError)
+      }
+    } catch (error) {
+      console.error("Ошибка регистрации:", error)
+      setErrorMessage("Ошибка регистрации. Пожалуйста, попробуйте снова.")
     }
-    
-    // alert(
-    //   `name: ${name} email: ${email} password: ${password}`
-    // );
 
     for (const key in state) {
       setState({
         ...state,
-        [key]: ""
-      });
+        [key]: "",
+      })
     }
-  };
+  }
 
   return (
     <div className="form-container sign-up-container">
       <form onSubmit={handleOnSubmit}>
         <h1>Регистрация</h1>
-        
-        <span>используйте ваш email для регистрации</span>
+        {successMessage && <div className="success-message">{successMessage}</div>}
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+        <span>используйте ваши данные для регистрации</span>
         <input
           type="text"
-          name="name"
-          value={state.name}
+          name="firstName"
+          value={state.firstName}
           onChange={handleChange}
-          placeholder="Name"
+          placeholder="Имя"
+          required
         />
         <input
-          type="email"
-          name="email"
-          value={state.email}
+          type="text"
+          name="lastName"
+          value={state.lastName}
           onChange={handleChange}
-          placeholder="Email"
+          placeholder="Фамилия"
+          required
+        />
+        <input type="email" name="email" value={state.email} onChange={handleChange} placeholder="Email" required />
+        <input
+          type="text"
+          name="passport"
+          value={state.passport}
+          onChange={handleChange}
+          placeholder="Паспорт"
+          required
+        />
+        <input type="text" name="snils" value={state.snils} onChange={handleChange} placeholder="СНИЛС" required />
+        <input
+          type="date"
+          name="birthDate"
+          value={state.birthDate}
+          onChange={handleChange}
+          placeholder="Дата рождения"
+          required
         />
         <input
           type="password"
           name="password"
           value={state.password}
           onChange={handleChange}
-          placeholder="Password"
+          placeholder="Пароль"
+          required
         />
         <button>зарегистрироватся</button>
       </form>
     </div>
-  );
+  )
 }
 
-export default RegisterForm;
+export default RegisterForm

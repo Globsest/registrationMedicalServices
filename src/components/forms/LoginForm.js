@@ -1,75 +1,105 @@
-import React from "react";
-import { loginUser } from '../../services/api.js';
-import { useDispatch } from 'react-redux';
-import { setUserID } from '../../redux/authSlice';
+"use client"
+
+import React, { useState } from "react"
+import { loginUser } from "../../services/api.js"
+import { useDispatch } from "react-redux"
+import { setUserID } from "../../redux/authSlice"
 
 function LoginForm() {
   const [state, setState] = React.useState({
-    email: "",
-    password: ""
-  });
+    passport: "",
+    password: "",
+  })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
-  const handleChange = evt => {
-    const value = evt.target.value;
+  const handleChange = (evt) => {
+    const value = evt.target.value
     setState({
       ...state,
-      [evt.target.name]: value
-    });
-  };
+      [evt.target.name]: value,
+    })
+  }
 
   const handleOnSubmit = async (evt) => {
-    evt.preventDefault();
+    evt.preventDefault()
+    setLoading(true)
+    setError(null)
 
-    const { email, password } = state;
-    
+    const { passport, password } = state
+
     try {
-      const response = await loginUser({ email, password });
-      const userID = response.data.user_id;
-      dispatch(setUserID(userID));
-      alert('Вход выполнен успешно!');
-      console.log('Авторизация:', response.data);
-    } 
-    catch (error) {
-      console.error('Ошибка авторизации:', error);
-      alert('Ошибка авторизации. Пожалуйста, проверьте данные.');
-    }
-    
-    // alert(`email: ${email} password: ${password}`);
+      console.log("Attempting login with:", { passport, password })
+      const response = await loginUser({ passport, password })
+      console.log("Login response:", response)
 
-    for (const key in state) {
+      // Store the JWT token
+      if (response.data) {
+        console.log("Token received:", response.data)
+        localStorage.setItem("token", response.data)
+
+        // Set a dummy user ID since we don't have one from the response
+        dispatch(setUserID(passport))
+
+        setError(null)
+        setSuccessMessage("Вход выполнен успешно!")
+
+        // Redirect to home page
+        window.location.href = "/"
+      } else {
+        throw new Error("No token received from server")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      setError(error.response?.data?.message || "Ошибка авторизации. Пожалуйста, проверьте данные.")
+      // Error is already set in the setError call above
+    } finally {
+      setLoading(false)
+
+      // Clear form
       setState({
-        ...state,
-        [key]: ""
-      });
+        passport: "",
+        password: "",
+      })
     }
-  };
+  }
 
   return (
     <div className="form-container sign-in-container">
       <form onSubmit={handleOnSubmit}>
         <h1>Вход</h1>
-        
+
+        {successMessage && <div className="success-message">{successMessage}</div>}
+
+        {error && <div className="error-message">{error}</div>}
+
         <input
-          type="email"
-          placeholder="Email"
-          name="email"
-          value={state.email}
+          type="text"
+          placeholder="Паспорт"
+          name="passport"
+          value={state.passport}
           onChange={handleChange}
+          required
+          disabled={loading}
         />
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Пароль"
           value={state.password}
           onChange={handleChange}
+          required
+          disabled={loading}
         />
-        {/* <a href="#">Забыли пароль?</a> */}
-        <button>войти</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Вход..." : "войти"}
+        </button>
       </form>
     </div>
-  );
+  )
 }
 
-export default LoginForm;
+export default LoginForm
