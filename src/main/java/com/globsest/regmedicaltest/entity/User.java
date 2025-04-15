@@ -20,5 +20,6 @@ public class User {
     private String password;
     private String snils;
     private Date birthDate;
+    private Role role;
 
 }
