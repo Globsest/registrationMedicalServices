@@ -19,30 +19,30 @@ import java.util.List;
 public class AdminController {
     private final MedicalAdminService adminService;
 
-    @PostMapping("/services")
+    @PostMapping("/createService")
     public ResponseEntity<MedicalServices> createService(@RequestBody MedicalServiceDto dto) {
         return ResponseEntity.ok(adminService.createMedicalService(dto));
     }
 
-    @PutMapping("/services/{id}")
+    @PutMapping("/updateService/{id}")
     public ResponseEntity<MedicalServices> updateService(
             @PathVariable Long id,
             @RequestBody MedicalServiceDto dto) {
         return ResponseEntity.ok(adminService.updateMedicalService(id, dto));
     }
 
-    @DeleteMapping("/services/{id}")
+    @DeleteMapping("/deleteService/{id}")
     public ResponseEntity<Void> deleteService(@PathVariable Long id) {
         adminService.deleteMedicalService(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/forms")
+    @PostMapping("/createForm")
     public ResponseEntity<ServiceForm> createForm(@RequestBody ServiceFormDto dto) {
         return ResponseEntity.ok(adminService.createServiceForm(dto));
     }
 
-    @PutMapping("/forms/{id}/structure")
+    @PutMapping("/updateForm/{id}")
     public ResponseEntity<ServiceForm> updateFullFormStructure(
             @PathVariable Long id,
             @RequestBody String jsonStructure) throws JsonProcessingException {

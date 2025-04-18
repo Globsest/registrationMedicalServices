@@ -10,6 +10,8 @@ import com.globsest.regmedicaltest.entity.MedicalServices;
 import com.globsest.regmedicaltest.entity.ServiceForm;
 import com.globsest.regmedicaltest.repository.MedicalServicesRepository;
 import com.globsest.regmedicaltest.repository.ServiceFormRepository;
+import com.globsest.regmedicaltest.repository.UserRecordsRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class MedicalAdminService {
 
     private final MedicalServicesRepository medicalServicesRepository;
     private final ServiceFormRepository serviceFormRepository;
+    private final UserRecordsRepository userRecordsRepository;
     private final ObjectMapper objectMapper;
 
 
@@ -45,7 +48,11 @@ public class MedicalAdminService {
 
     @Transactional
     public void deleteMedicalService(Long id) {
-        ServiceForm forms = serviceFormRepository.findByMedicalService_ServiceId(id);
+        if (!medicalServicesRepository.existsById(id)) {
+            throw new EntityNotFoundException("Medical service with id " + id + " not found");
+        }
+        serviceFormRepository.deleteById(id);
+        userRecordsRepository.deleteById(id);
         medicalServicesRepository.deleteById(id);
     }
 
