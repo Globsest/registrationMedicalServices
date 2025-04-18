@@ -8,6 +8,7 @@ import com.globsest.regmedicaltest.dto.LoginRequest;
 import com.globsest.regmedicaltest.dto.RegisterRequest;
 import com.globsest.regmedicaltest.entity.User;
 import com.globsest.regmedicaltest.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,8 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/auth")
 public class SecurityController {
 
@@ -51,6 +52,11 @@ public class SecurityController {
     public void setJwtCore(JWTCore jwtCore) {
         this.jwtCore = jwtCore;
     }
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
 
     @PostMapping("/register")
     ResponseEntity<?> signup(@RequestBody RegisterRequest registerRequest) {
@@ -93,8 +99,7 @@ public class SecurityController {
 
         return ResponseEntity.ok(new AuthResponse(
                 accessToken,
-                refreshToken,
-                userDetails.getUsername()
+                refreshToken
         ));
     }
 
@@ -112,8 +117,7 @@ public class SecurityController {
 
         return ResponseEntity.ok(new AuthResponse(
                 newAccessToken,
-                newRefreshToken,
-                userDetails.getUsername()
+                newRefreshToken
         ));
     }
 

@@ -10,5 +10,4 @@ import lombok.RequiredArgsConstructor;
 public class AuthResponse {
     String accessToken;
     String refreshToken;
-    String passport;
 }

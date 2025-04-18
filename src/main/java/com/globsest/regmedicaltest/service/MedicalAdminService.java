@@ -45,8 +45,7 @@ public class MedicalAdminService {
 
     @Transactional
     public void deleteMedicalService(Long id) {
-        List<ServiceForm> forms = (List<ServiceForm>) serviceFormRepository.findByMedicalService_ServiceId(id);
-        serviceFormRepository.deleteAll(forms);
+        ServiceForm forms = serviceFormRepository.findByMedicalService_ServiceId(id);
         medicalServicesRepository.deleteById(id);
     }
 
