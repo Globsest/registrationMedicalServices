@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { loginUser } from "../../services/api.js"
 import { useDispatch } from "react-redux"
-import { setUserID } from "../../redux/authSlice"
+import { setUserID, setTokens } from "../../redux/authSlice"
 
 function LoginForm() {
   const [state, setState] = React.useState({
@@ -37,12 +37,18 @@ function LoginForm() {
       console.log("Login response:", response)
 
       // Store the JWT token
-      if (response.data) {
+      //if (response.data) {
+      if (response.data?.accessToken && response.data?.refreshToken) {
         console.log("Token received:", response.data)
-        localStorage.setItem("token", response.data)
+        //localStorage.setItem("token", response.data)
+
+        dispatch(setTokens({
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken
+        }))
 
         // Set a dummy user ID since we don't have one from the response
-        dispatch(setUserID(passport))
+        //dispatch(setUserID(passport))
 
         setError(null)
         setSuccessMessage("Вход выполнен успешно!")

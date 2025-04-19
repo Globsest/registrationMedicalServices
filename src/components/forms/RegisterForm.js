@@ -3,7 +3,8 @@
 import React, { useState } from "react"
 import { registerUser, loginUser } from "../../services/api.js"
 import { useDispatch } from "react-redux"
-import { setUserID } from "../../redux/authSlice"
+import { setUserID, setTokens } from "../../redux/authSlice"
+
 
 function RegisterForm() {
   const [state, setState] = React.useState({
@@ -46,8 +47,14 @@ function RegisterForm() {
         console.log("Auto-login response:", loginResponse)
 
         // Store the JWT token
-        if (loginResponse.data) {
-          localStorage.setItem("token", loginResponse.data)
+        //if (loginResponse.data) {
+        if (loginResponse.data?.accessToken && loginResponse.data?.refreshToken) {
+          dispatch(setTokens({
+            accessToken: loginResponse.data.accessToken,
+            refreshToken: loginResponse.data.refreshToken
+          }))
+          
+          //localStorage.setItem("token", loginResponse.data)
 
           // Set a dummy user ID since we don't have one from the response
           dispatch(setUserID(passport))

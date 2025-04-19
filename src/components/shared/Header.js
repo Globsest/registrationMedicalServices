@@ -6,8 +6,10 @@ import { clearUserID } from "../../redux/authSlice"
 
 const Header = () => {
   const dispatch = useDispatch()
-  const userID = useSelector((state) => state.auth.userID)
-  const token = localStorage.getItem("token")
+  //const userID = useSelector((state) => state.auth.userID)
+  //const token = localStorage.getItem("token")
+
+  const { token, refreshToken } = useSelector((state) => state.auth)
 
   const handleLoginClick = () => {
     window.location.href = "/auth"
@@ -15,7 +17,7 @@ const Header = () => {
 
   const handleLogoutClick = () => {
     // Clear token and user ID
-    localStorage.removeItem("token")
+    //localStorage.removeItem("token")
     dispatch(clearUserID())
 
     console.log("Logged out, token removed")

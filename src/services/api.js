@@ -1,4 +1,6 @@
 import axios from "axios"
+import { store } from "../redux/store"
+import { setTokens, clearUserID, setRefreshing } from "../redux/authSlice"
 
 const API_BASE_URL = "http://localhost:8080" // Базовый URL сервера
 
@@ -11,52 +13,57 @@ const api = axios.create({
 })
 
 // Add request interceptor for debugging
-api.interceptors.request.use(
-  (config) => {
-    console.log("API Request:", {
-      url: config.url,
-      method: config.method,
-      data: config.data,
-      headers: config.headers,
-    })
+api.interceptors.request.use((config) => {
+  const token = store.getState().auth.token
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`
+  }
+  return config
+})
 
-    const token = localStorage.getItem("token")
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`
+
+// Обработка ответов и обновление токена
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+    const { dispatch, getState } = store
+    const { refreshToken, isRefreshing } = getState().auth
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      refreshToken &&
+      !isRefreshing
+    ) {
+      originalRequest._retry = true
+      dispatch(setRefreshing(true))
+
+      try {
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          refreshToken,
+        })
+        const { accessToken, refreshToken: newRefreshToken } = response.data
+        dispatch(setTokens({ accessToken, refreshToken: newRefreshToken }))
+        
+        originalRequest.headers["Authorization"] = `Bearer ${accessToken}`
+        return api(originalRequest)
+      } catch (refreshError) {
+        dispatch(clearUserID())
+        return Promise.reject(refreshError)
+      } finally {
+        dispatch(setRefreshing(false))
+      }
     }
 
-    return config
-  },
-  (error) => {
-    console.error("API Request Error:", error)
     return Promise.reject(error)
-  },
+  }
 )
 
-// Add response interceptor for debugging
-api.interceptors.response.use(
-  (response) => {
-    console.log("API Response:", {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    })
-    return response
-  },
-  (error) => {
-    console.error(
-      "API Response Error:",
-      error.response
-        ? {
-            url: error.config.url,
-            status: error.response.status,
-            data: error.response.data,
-          }
-        : error,
-    )
-    return Promise.reject(error)
-  },
-)
+export const refreshTokens = () => {
+  const refreshToken = store.getState().auth.refreshToken
+  return api.post("/auth/refresh", { refreshToken })
+}
 
 export const registerUser = (userData) => {
   console.log("Registering user with data:", userData)
@@ -76,7 +83,10 @@ export const loginUser = (credentials) => {
   return api.post("/auth/login", {
     passport: credentials.passport,
     password: credentials.password,
-  })
+  }).then((response) => {
+    const { accessToken, refreshToken } = response.data
+    store.dispatch(setTokens({ accessToken, refreshToken }))
+    return response})
 }
 
 export const getUserInfo = () => {
