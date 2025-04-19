@@ -58,6 +58,15 @@ public class MedicalAdminService {
 
     @Transactional
     public ServiceForm createServiceForm(ServiceFormDto dto) {
+
+        MedicalServices service = medicalServicesRepository.findById(dto.getServiceId())
+                .orElseThrow(() -> new EntityNotFoundException("Medical service not found"));
+
+        if (serviceFormRepository.existsByMedicalService(service)) {
+            throw new IllegalStateException("Form already exists for this service");
+        }
+        //проверка на существующую форму, чтобы админ не смог создать две
+
         ServiceForm form = new ServiceForm();
         form.setMedicalService(medicalServicesRepository.findById(dto.getServiceId())
                 .orElseThrow(() -> new RuntimeException("Medical service not found")));
@@ -95,14 +104,6 @@ public class MedicalAdminService {
     @Transactional
     public void deleteServiceForm(Long formId) {
         serviceFormRepository.deleteById(formId);
-    }
-
-    public List<MedicalServices> getAllMedicalServices() {
-        return medicalServicesRepository.findAll();
-    }
-
-    public Optional<MedicalServices> getMedicalServiceById(Long id) {
-        return medicalServicesRepository.findById(id);
     }
 
     public List<ServiceForm> getFormsByServiceId(Long serviceId) {

@@ -49,20 +49,20 @@ public class AdminController {
         return ResponseEntity.ok(adminService.updateServiceFormStructure(id, jsonStructure));
     }
 
-    @PatchMapping("/forms/{id}/structure")
+    @PatchMapping("/updateForm/{id}/structure")
     public ResponseEntity<ServiceForm> partialUpdateFormStructure(
             @PathVariable Long id,
             @RequestBody String jsonUpdates) throws JsonProcessingException {
         return ResponseEntity.ok(adminService.partialUpdateServiceForm(id, jsonUpdates));
     }
 
-    @DeleteMapping("/forms/{id}")
+    @DeleteMapping("/deleteForm/{id}")
     public ResponseEntity<Void> deleteForm(@PathVariable Long id) {
         adminService.deleteServiceForm(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/services/{serviceId}/forms")
+    @GetMapping("{serviceId}/forms")
     public ResponseEntity<List<ServiceForm>> getFormsByService(@PathVariable Long serviceId) {
         return ResponseEntity.ok(adminService.getFormsByServiceId(serviceId));
     }
