@@ -20,6 +20,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -68,6 +69,32 @@ public class PDFGeneratorService {
 
         document.close();
 
+    }
+
+    public byte[] generatePDFBytes(ServiceForm serviceForm, User user, Map<String, Object> formData,
+                                   UserRecords record) throws IOException
+    {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Document document = new Document(PageSize.A4);
+        PdfWriter.getInstance(document, outputStream);
+
+        document.open();
+
+        document.addTitle("Медицинская карта");
+        addLogo(document);
+        addDocumentHeader(document);
+
+        addIntroText(document, user, serviceForm);
+        addUserInfo(document, user);
+        addAgree(document);
+
+        addServiceInfo(document, serviceForm);
+        addFormData(document, formData);
+        addConcludingText(document);
+        addSignatureAndDate(document, record);
+
+        document.close();
+        return outputStream.toByteArray();
     }
 
     private void addLogo(Document document) throws DocumentException, IOException {
