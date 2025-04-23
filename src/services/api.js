@@ -65,6 +65,10 @@ export const refreshTokens = () => {
   return api.post("/auth/refresh", { refreshToken })
 }
 
+export const getDocumentsList = () => {
+  return api.get("/api/profile/documents")
+}
+
 export const registerUser = (userData) => {
   console.log("Registering user with data:", userData)
   return api.post("/auth/register", {
@@ -91,6 +95,10 @@ export const loginUser = (credentials) => {
 
 export const getUserInfo = () => {
   return api.get("/secured/user")
+}
+
+export const getProfile = () => {
+  return api.get("/api/profile/info");
 }
 
 export const getMedicalServices = () => {

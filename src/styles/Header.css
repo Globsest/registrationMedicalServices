@@ -23,7 +23,8 @@ header {
   letter-spacing: 1px;
 }
 
-.loginbutton {
+.loginbutton, .profile-button {
   background-color: transparent;
-  border-color: #ffffff;  
+  border-color: #ffffff; 
+  margin-right: 20px;
 }

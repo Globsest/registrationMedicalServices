@@ -26,12 +26,21 @@ const Header = () => {
     window.location.href = "/"
   }
 
+  const handleProfileClick = () => {
+    window.location.href = "/profile"
+  }
+
   return (
     <header>
       <h1 onClick={() => (window.location.href = "/")} style={{ cursor: "pointer" }}>
         медуслуги
       </h1>
       <div>
+      {token && (
+          <button className="profile-button" onClick={handleProfileClick}>
+            Личный кабинет
+          </button>
+        )}
         {token ? (
           <button className="loginbutton" onClick={handleLogoutClick}>
             Выйти
