@@ -132,22 +132,23 @@ public class SecurityController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
 
-        String passport = null;
+        //Попытки вытянуть паспорт
+//        String passport = null;
+//
+//        //Из UserDetails
+//        if (authentication.getPrincipal() instanceof UserDetails) {
+//            passport = ((UserDetails) authentication.getPrincipal()).getUsername();
+//        }
+//        //Из строки
+//        else if (authentication.getPrincipal() instanceof String) {
+//            passport = (String) authentication.getPrincipal();
+//        }
+//        //Из имени аутентификации
+//        else {
+//            passport = authentication.getName();
+//        }
 
-        //Из UserDetails
-        if (authentication.getPrincipal() instanceof UserDetails) {
-            passport = ((UserDetails) authentication.getPrincipal()).getUsername();
-        }
-        //Из строки
-        else if (authentication.getPrincipal() instanceof String) {
-            passport = (String) authentication.getPrincipal();
-        }
-        //Из имени аутентификации
-        else {
-            passport = authentication.getName();
-        }
-
-        User user = userRepository.findByPassport(passport);
+        User user = userRepository.findByPassport(((UserDetails) authentication.getPrincipal()).getUsername());
 
         if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid current password");
