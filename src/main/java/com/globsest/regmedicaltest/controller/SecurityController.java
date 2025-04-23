@@ -1,11 +1,8 @@
 package com.globsest.regmedicaltest.controller;
 
-import com.globsest.regmedicaltest.dto.AuthResponse;
-import com.globsest.regmedicaltest.dto.RefreshRequest;
+import com.globsest.regmedicaltest.dto.*;
 import com.globsest.regmedicaltest.service.UserService;
 import com.globsest.regmedicaltest.token.JWTCore;
-import com.globsest.regmedicaltest.dto.LoginRequest;
-import com.globsest.regmedicaltest.dto.RegisterRequest;
 import com.globsest.regmedicaltest.entity.User;
 import com.globsest.regmedicaltest.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -125,6 +122,49 @@ public class SecurityController {
     public ResponseEntity<?> logout() {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logout successful");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        String passport = null;
+
+        //Из UserDetails
+        if (authentication.getPrincipal() instanceof UserDetails) {
+            passport = ((UserDetails) authentication.getPrincipal()).getUsername();
+        }
+        //Из строки
+        else if (authentication.getPrincipal() instanceof String) {
+            passport = (String) authentication.getPrincipal();
+        }
+        //Из имени аутентификации
+        else {
+            passport = authentication.getName();
+        }
+
+        User user = userRepository.findByPassport(passport);
+
+        if (!passwordEncoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid current password");
+        }
+
+        if (passwordEncoder.matches(changePasswordRequest.getNewPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("New password must be different from old password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
+
+        //принудительный выход
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok("Password changed successfully. Please login again.");
+        
     }
 
 }
