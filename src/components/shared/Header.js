@@ -6,23 +6,15 @@ import { clearUserID } from "../../redux/authSlice"
 
 const Header = () => {
   const dispatch = useDispatch()
-  //const userID = useSelector((state) => state.auth.userID)
-  //const token = localStorage.getItem("token")
-
-  const { token, refreshToken } = useSelector((state) => state.auth)
+  const { token } = useSelector((state) => state.auth)
 
   const handleLoginClick = () => {
     window.location.href = "/auth"
   }
 
   const handleLogoutClick = () => {
-    // Clear token and user ID
-    //localStorage.removeItem("token")
     dispatch(clearUserID())
-
     console.log("Logged out, token removed")
-
-    // Redirect to home page
     window.location.href = "/"
   }
 
@@ -32,11 +24,18 @@ const Header = () => {
 
   return (
     <header>
-      <h1 onClick={() => (window.location.href = "/")} style={{ cursor: "pointer" }}>
-        медуслуги
-      </h1>
-      <div>
-      {token && (
+      <div className="header-left">
+        <h1 onClick={() => (window.location.href = "/")} style={{ cursor: "pointer" }}>
+          медуслуги
+        </h1>
+      </div>
+
+      <div className="header-center">
+        <input className="search-input" type="text" placeholder="🔍 Поиск" />
+      </div>
+
+      <div className="header-right">
+        {token && (
           <button className="profile-button" onClick={handleProfileClick}>
             Личный кабинет
           </button>

@@ -53,7 +53,7 @@ const DocumentsList = () => {
   
     return (
       <div className="documents-container">
-        <h2>История документов</h2>
+        {/* <h2>История документов</h2> */}
         
         {documents.length === 0 ? (
           <p className="documents-empty">У вас пока нет сгенерированных документов</p>

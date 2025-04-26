@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import AuthPage from "./pages/AuthPage"
+import AdminPage from "./pages/admin"
 import ProfilePage from "./pages/ProfilePage"
 import PdfViewerPage from "./components/pdf/PdfViewerPage"
 import "./styles/global.css"
@@ -13,6 +14,7 @@ function App() {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/pdf/:recordId" element={<PdfViewerPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </Router>
   )

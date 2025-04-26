@@ -1,0 +1,146 @@
+.profile-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    
+    background: #f7f7f7;
+  }
+  
+  .profile-main {
+    flex: 1;
+    padding: 40px 20px;
+    /* background: linear-gradient(135deg, #f5f7fa, #c3cfe2); */
+  }
+  
+  .profile-title {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 40px;
+    color: #333;
+  }
+  
+  .cards-wrapper {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .profile-card {
+    background: white;
+    flex: 1 1 350px;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .card-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #4f3258;
+    text-align: center;
+  }
+  
+  .profile-info {
+    margin-bottom: 20px;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  
+  .info-item {
+    background: #f0f4f8;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .info-label {
+    font-weight: bold;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  
+  .info-value {
+    font-size: 16px;
+    color: #222;
+  }
+  
+  .loading, .error-message {
+    text-align: center;
+    font-size: 18px;
+    color: #555;
+    padding: 20px;
+  }
+  
+  .retry-button {
+    margin-top: 15px;
+    background: #4f3258;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .retry-button:hover {
+    background: #6a4c7a;
+  }
+  
+  /* Адаптив для мобильных */
+  @media (max-width: 768px) {
+    .cards-wrapper {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  
+  .change-password-section {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .change-password-button, .save-password-button {
+    background: #4f3258;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .change-password-button:hover, .save-password-button:hover {
+    background: #6a4c7a;
+  }
+  
+  .password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin-top: 15px;
+  }
+  
+  .password-input {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    width: 100%;
+  }
+  
