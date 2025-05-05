@@ -44,7 +44,7 @@ public class PDFExportController {
     public void generatePDF(@PathVariable Long recordId, HttpServletResponse response) throws Exception {
 
         UserRecords record = userRecordsRepository.findById(recordId).orElseThrow();
-        User user = userRepository.findById(record.getUser().getId()).orElseThrow();
+        //User user = userRepository.findById(record.getUser().getId()).orElseThrow();
         ServiceForm form = (ServiceForm) serviceFormRepository.findByMedicalService_ServiceId(record.getServices().getServiceId());
 
         Map<String, Object> formData = objectMapper.readValue(
@@ -52,18 +52,20 @@ public class PDFExportController {
                 new TypeReference<Map<String, Object>>() {}
         );
 
+        Map<String, Object> userFields = (Map<String, Object>) formData.get("userFields");
+        Map<String, Object> serviceFields = (Map<String, Object>) formData.get("serviceFields");
 
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "filename=\"medical_form_"+recordId+".pdf\"");
 
-        this.pdfGeneratorService.export(response,form,user,formData, record);
+        this.pdfGeneratorService.export(response, form, userFields, serviceFields, record);
     }
 
     @PostMapping("/send-by-email")
     public ResponseEntity<String> sendByEmail(@RequestBody EmailRequest emailRequest) throws Exception {
         try {
             UserRecords record = userRecordsRepository.findById(emailRequest.getRecordId()).orElseThrow();
-            User user = userRepository.findById(record.getUser().getId()).orElseThrow();
+            //User user = userRepository.findById(record.getUser().getId()).orElseThrow();
             ServiceForm form = serviceFormRepository.findByMedicalService_ServiceId(record.getServices().getServiceId());
 
             Map<String, Object> formData = objectMapper.readValue(
@@ -71,7 +73,10 @@ public class PDFExportController {
                     new TypeReference<Map<String, Object>>() {}
             );
 
-            byte[] pdfBytes = pdfGeneratorService.generatePDFBytes(form, user, formData, record);
+            Map<String, Object> userFields = (Map<String, Object>) formData.get("userFields");
+            Map<String, Object> serviceFields = (Map<String, Object>) formData.get("serviceFields");
+
+            byte[] pdfBytes = pdfGeneratorService.generatePDFBytes(form, userFields, serviceFields, record);
             mailService.sendPdfToEmail(emailRequest.getEmail(), pdfBytes);
             return ResponseEntity.ok("PDF успешно отправлен на " + emailRequest.getEmail());
         } catch (Exception e) {

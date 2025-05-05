@@ -45,8 +45,8 @@ public class PDFGeneratorService {
 
     public void export(HttpServletResponse response,
                        ServiceForm serviceForm,
-                       User user,
-                       Map<String, Object> formData,
+                       Map<String, Object> userFields,
+                       Map<String, Object> serviceFields,
                        UserRecords record) throws IOException {
 
         Document document = new Document(PageSize.A4);
@@ -58,12 +58,12 @@ public class PDFGeneratorService {
         addLogo(document);
         addDocumentHeader(document);
 
-        addIntroText(document, user, serviceForm);
-        addUserInfo(document, user);
+        addIntroText(document, userFields, serviceForm);
+        addUserInfo(document, userFields);
         addAgree(document);
 
         addServiceInfo(document, serviceForm);
-        addFormData(document, formData);
+        addFormData(document, serviceFields);
         addConcludingText(document);
         addSignatureAndDate(document, record);
 
@@ -71,7 +71,9 @@ public class PDFGeneratorService {
 
     }
 
-    public byte[] generatePDFBytes(ServiceForm serviceForm, User user, Map<String, Object> formData,
+    public byte[] generatePDFBytes(ServiceForm serviceForm,
+                                   Map<String, Object> userFields,
+                                   Map<String, Object> serviceFields,
                                    UserRecords record) throws IOException
     {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -84,12 +86,12 @@ public class PDFGeneratorService {
         addLogo(document);
         addDocumentHeader(document);
 
-        addIntroText(document, user, serviceForm);
-        addUserInfo(document, user);
+        addIntroText(document, userFields, serviceForm);
+        addUserInfo(document, userFields);
         addAgree(document);
 
         addServiceInfo(document, serviceForm);
-        addFormData(document, formData);
+        addFormData(document, serviceFields);
         addConcludingText(document);
         addSignatureAndDate(document, record);
 
@@ -119,13 +121,16 @@ public class PDFGeneratorService {
     }
 
 
-    private void addIntroText(Document document, User user, ServiceForm serviceForm) throws DocumentException {
+    private void addIntroText(Document document, Map<String, Object> userFields, ServiceForm serviceForm) throws DocumentException {
         Paragraph intro = new Paragraph();
         intro.setFirstLineIndent(20);
         intro.setFont(baseFont);
         intro.setAlignment(Element.ALIGN_JUSTIFIED);
         intro.add("Я, ");
-        intro.add(new Phrase(user.getLastName() + " " + user.getFirstName() + " ", boldFont));
+        intro.add(new Phrase(
+                userFields.get("Фамилия") + " " + userFields.get("Имя") + " ",
+                boldFont
+        ));
         intro.add(", настоящим заявлением подтверждаю свое согласие на оказание медицинской услуги \"");
         intro.add(new Phrase(serviceForm.getMedicalService().getDescription(), boldFont));
         intro.add("\" и предоставляю следующие персональные данные:");
@@ -133,7 +138,7 @@ public class PDFGeneratorService {
         document.add(intro);
     }
 
-    private void addUserInfo(Document document, User user) throws DocumentException {
+    private void addUserInfo(Document document, Map<String, Object> userFields) throws DocumentException {
 //        Paragraph userHeader = new Paragraph("Patient Information:", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14));
 //        document.add(userHeader);
 
@@ -141,11 +146,12 @@ public class PDFGeneratorService {
         table.setWidthPercentage(100);
         table.setSpacingBefore(10f);
 
-        addTableRow(table, "Полное имя", user.getLastName() + " " + user.getFirstName());
-        addTableRow(table, "Почта", user.getEmail());
-        addTableRow(table, "Снилс", user.getSnils());
-        addTableRow(table, "Паспортные данные", user.getPassport());
-        addTableRow(table, "Дата рождения", user.getBirthDate().toString());
+        addTableRow(table, "Фамилия", String.valueOf(userFields.get("Фамилия")));
+        addTableRow(table, "Имя", String.valueOf(userFields.get("Имя")));
+        addTableRow(table, "Почта", String.valueOf(userFields.get("Почта")));
+        addTableRow(table, "Снилс", String.valueOf(userFields.get("Снилс")));
+        addTableRow(table, "Паспорт", String.valueOf(userFields.get("Паспорт")));
+        addTableRow(table, "Дата рождения", String.valueOf(userFields.get("Дата рождения")));
 
         document.add(table);
     }
