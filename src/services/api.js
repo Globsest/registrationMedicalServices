@@ -115,8 +115,8 @@ export const getServiceForm = (serviceId) => {
 export const submitForm = (formData) => {
   console.log("Submitting form with data:", formData)
   return api.post("/api/services/submit", {
-    serviceId: formData.service_id,
-    formFields: formData,
+    serviceId: formData.serviceId, 
+    formFields: formData.formFields 
   })
 }
 

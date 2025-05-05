@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import "../../styles/HomePage.css"
-import { submitForm, getPdfDocument, getServiceForm } from "../../services/api.js"
+import { submitForm, getPdfDocument, getServiceForm, getProfile } from "../../services/api.js"
 import { useSelector } from "react-redux"
 import PdfViewer from "../pdf/PdfViewer"
 
@@ -14,13 +14,41 @@ const DynamicForm = ({ service, onClose }) => {
   const [showPdfViewer, setShowPdfViewer] = useState(false)
   const [fields, setFields] = useState([])
   const [loadingFields, setLoadingFields] = useState(true)
+  const [loadingUserData, setLoadingUserData] = useState(true)
   const userID = useSelector((state) => state.auth.userID)
   const [successMessage, setSuccessMessage] = useState(null)
 
-  const currentDate = new Date()
-  const formattedDate = currentDate.toLocaleString()
+  //const currentDate = new Date()
+  //const formattedDate = currentDate.toLocaleString()
 
   console.log("Service in DynamicForm:", service)
+
+  // Захардкоженные пользовательские поля
+  const userFields = [
+    "Фамилия",
+    "Имя", 
+    "Паспорт",
+    "Снилс",
+    "Почта",
+    "Дата рождения" 
+  ]
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    
+    try {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return "";
+    }
+  };
+
 
   // Load fields when component mounts
   useEffect(() => {
@@ -29,6 +57,22 @@ const DynamicForm = ({ service, onClose }) => {
       setError(null)
 
       try {
+        const userResponse = await getProfile()
+        const userData = userResponse.data
+
+        const formattedBirthDate = formatDate(userData.birthDate)
+        const initialFormData = {
+          "Фамилия": userData.lastName || "",
+          "Имя": userData.firstName || "",
+          "Паспорт": userData.passport || "",
+          "Снилс": userData.snils || "",
+          "Почта": userData.email || "",
+          "Дата рождения": formattedBirthDate
+        }
+        
+        setFormData(initialFormData)
+        setLoadingUserData(false)
+
         const serviceId = service.serviceId || service.id
 
         if (!serviceId) {
@@ -58,8 +102,10 @@ const DynamicForm = ({ service, onClose }) => {
 
           console.log("Form fields extracted:", formFields)
 
-          if (formFields.length > 0) {
-            setFields(formFields)
+          const allFields = [...userFields, ...formFields]
+
+          if (allFields.length > 0) {
+            setFields(allFields)
           } else {
             throw new Error("No fields found in form structure")
           }
@@ -77,6 +123,7 @@ const DynamicForm = ({ service, onClose }) => {
     fetchFields()
   }, [service])
 
+
   // Обработчик изменения полей формы
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value })
@@ -91,15 +138,29 @@ const DynamicForm = ({ service, onClose }) => {
 
     console.log("Submitting form data:", formData)
 
-    // Create a form data object that includes all required fields
-    const formDataToSubmit = {
-      service_id: service.serviceId || service.id,
-      ...formData,
-      created_at: formattedDate,
-    }
 
+    const payload = {
+      serviceId: service.serviceId || service.id,
+      formFields: {
+        userFields: {},
+        serviceFields: {}
+      }
+    };
+  
+    // Заполняем userFields (хардкодные поля)
+    const userFieldsList = ["Фамилия", "Имя", "Паспорт", "Снилс", "Почта", "Дата рождения"];
+    userFieldsList.forEach(field => {
+      payload.formFields.userFields[field] = formData[field] || "";
+    });
+  
+    // Заполняем serviceFields (все остальные поля)
+    Object.keys(formData).forEach(key => {
+      if (!userFieldsList.includes(key)) {
+        payload.formFields.serviceFields[key] = formData[key];
+      }
+    });
     try {
-      const response = await submitForm(formDataToSubmit)
+      const response = await submitForm(payload)
       console.log("Form submission response:", response)
 
       setSuccessMessage("Форма успешно отправлена!")
