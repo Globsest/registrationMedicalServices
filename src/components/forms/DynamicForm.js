@@ -12,18 +12,13 @@ const DynamicForm = ({ service, onClose }) => {
   const [error, setError] = useState(null)
   const [pdfData, setPdfData] = useState(null)
   const [showPdfViewer, setShowPdfViewer] = useState(false)
+  const [recordId, setRecordId] = useState(null) // Новый state
   const [fields, setFields] = useState([])
   const [loadingFields, setLoadingFields] = useState(true)
   const [loadingUserData, setLoadingUserData] = useState(true)
   const userID = useSelector((state) => state.auth.userID)
   const [successMessage, setSuccessMessage] = useState(null)
 
-  //const currentDate = new Date()
-  //const formattedDate = currentDate.toLocaleString()
-
-  console.log("Service in DynamicForm:", service)
-
-  // Захардкоженные пользовательские поля
   const userFields = [
     "Фамилия",
     "Имя", 
@@ -49,8 +44,6 @@ const DynamicForm = ({ service, onClose }) => {
     }
   };
 
-
-  // Load fields when component mounts
   useEffect(() => {
     const fetchFields = async () => {
       setLoadingFields(true)
@@ -79,18 +72,13 @@ const DynamicForm = ({ service, onClose }) => {
           throw new Error("Service ID is required to fetch fields")
         }
 
-        // Fetch the form structure from the API
         const response = await getServiceForm(serviceId)
-        console.log("Form structure response:", response.data)
 
-        // Extract fields from the formStruct property
         if (response.data && response.data.formStruct) {
           let formFields = []
 
-          // Handle different formats of formStruct
           if (typeof response.data.formStruct === "string") {
             try {
-              // Try to parse as JSON if it's a string
               formFields = JSON.parse(response.data.formStruct)
             } catch (e) {
               console.error("Error parsing formStruct:", e)
@@ -99,8 +87,6 @@ const DynamicForm = ({ service, onClose }) => {
           } else if (Array.isArray(response.data.formStruct)) {
             formFields = response.data.formStruct
           }
-
-          console.log("Form fields extracted:", formFields)
 
           const allFields = [...userFields, ...formFields]
 
@@ -123,21 +109,15 @@ const DynamicForm = ({ service, onClose }) => {
     fetchFields()
   }, [service])
 
-
-  // Обработчик изменения полей формы
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value })
   }
 
-  // Обработчик отправки формы
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     setSuccessMessage(null)
-
-    console.log("Submitting form data:", formData)
-
 
     const payload = {
       serviceId: service.serviceId || service.id,
@@ -145,40 +125,29 @@ const DynamicForm = ({ service, onClose }) => {
         userFields: {},
         serviceFields: {}
       }
-    };
-  
-    // Заполняем userFields (хардкодные поля)
-    const userFieldsList = ["Фамилия", "Имя", "Паспорт", "Снилс", "Почта", "Дата рождения"];
+    }
+
+    const userFieldsList = ["Фамилия", "Имя", "Паспорт", "Снилс", "Почта", "Дата рождения"]
     userFieldsList.forEach(field => {
-      payload.formFields.userFields[field] = formData[field] || "";
-    });
-  
-    // Заполняем serviceFields (все остальные поля)
+      payload.formFields.userFields[field] = formData[field] || ""
+    })
+
     Object.keys(formData).forEach(key => {
       if (!userFieldsList.includes(key)) {
-        payload.formFields.serviceFields[key] = formData[key];
+        payload.formFields.serviceFields[key] = formData[key]
       }
-    });
+    })
+
     try {
       const response = await submitForm(payload)
-      console.log("Form submission response:", response)
-
       setSuccessMessage("Форма успешно отправлена!")
 
-      // If we have a record ID, directly show the PDF
       if (response.data) {
-        const recordId = response.data
-
-        try {
-          const pdfResponse = await getPdfDocument(recordId)
-          setPdfData(pdfResponse.data)
-          setShowPdfViewer(true)
-        } catch (pdfError) {
-          console.error("Ошибка при получении PDF:", pdfError)
-          setError("Не удалось получить PDF-документ. Пожалуйста, попробуйте позже.")
-        }
+        setRecordId(response.data) // сохраняем recordId
+        const pdfResponse = await getPdfDocument(response.data)
+        setPdfData(pdfResponse.data)
+        setShowPdfViewer(true)
       } else {
-        // If no record ID, just close the form
         onClose()
       }
     } catch (error) {
@@ -189,19 +158,16 @@ const DynamicForm = ({ service, onClose }) => {
     }
   }
 
-  // Close PDF viewer
   const handleClosePdfViewer = () => {
     setShowPdfViewer(false)
     setPdfData(null)
     onClose()
   }
 
-  // If showing PDF viewer, render that instead of the form
-  if (showPdfViewer && pdfData) {
-    return <PdfViewer pdfData={pdfData} onClose={handleClosePdfViewer} />
+  if (showPdfViewer && pdfData && recordId) {
+    return <PdfViewer pdfData={pdfData} onClose={handleClosePdfViewer} recordId={recordId} />
   }
 
-  // Show loading state while fetching fields
   if (loadingFields) {
     return (
       <div className="modalOverlay">
@@ -213,7 +179,6 @@ const DynamicForm = ({ service, onClose }) => {
     )
   }
 
-  // If no fields are available, show a message
   if (fields.length === 0) {
     return (
       <div className="modalOverlay">
@@ -221,9 +186,7 @@ const DynamicForm = ({ service, onClose }) => {
           <h2>{service.name || service.description || "Медицинская услуга"}</h2>
           <div className="error-message">Для данной услуги не определены поля формы.</div>
           <div className="formActions">
-            <button type="button" onClick={onClose}>
-              Закрыть
-            </button>
+            <button type="button" onClick={onClose}>Закрыть</button>
           </div>
         </div>
       </div>

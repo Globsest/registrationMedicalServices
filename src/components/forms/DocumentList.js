@@ -80,9 +80,10 @@ const DocumentsList = () => {
   
         {selectedPdf && (
           <PdfViewer 
-            pdfData={selectedPdf.data} 
-            onClose={handleClosePdf}
-          />
+          pdfData={selectedPdf.data} 
+          onClose={handleClosePdf}
+          recordId={selectedPdf.recordId}
+        />        
         )}
       </div>
     )

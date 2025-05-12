@@ -3,7 +3,7 @@
 import "../styles/ProfilePage.css"
 import { useEffect, useState } from "react"
 import { useSelector } from "react-redux"
-import { getProfile } from "../services/api"
+import { getProfile, changePassword } from "../services/api"
 import Header from "../components/shared/Header"
 import Footer from "../components/shared/Footer"
 import DocumentsList from "../components/forms/DocumentList"
@@ -15,8 +15,12 @@ export default function ProfilePage() {
   const [error, setError] = useState(null)
 
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [passwordSuccess, setPasswordSuccess] = useState("")
+  const [passwordLoading, setPasswordLoading] = useState(false)
 
   useEffect(() => {
     if (!token) {
@@ -39,20 +43,46 @@ export default function ProfilePage() {
     loadProfile()
   }, [token])
 
-  const handleSavePassword = () => {
+  const handleSavePassword = async () => {
+    // Сбросить предыдущие сообщения
+    setPasswordError("")
+    setPasswordSuccess("")
+
+    // Проверка совпадения паролей
     if (newPassword !== confirmPassword) {
-      alert("Пароли не совпадают!")
+      setPasswordError("Пароли не совпадают!")
       return
     }
 
-    // Здесь вызов API для сохранения пароля (псевдокод)
-    console.log("Saving new password:", newPassword)
-    alert("Пароль успешно изменён!")
+    // Проверка на пустые поля
+    if (!currentPassword || !newPassword) {
+      setPasswordError("Пожалуйста, заполните все поля")
+      return
+    }
 
-    // Очистить поля и вернуть кнопку назад
-    setNewPassword("")
-    setConfirmPassword("")
-    setIsChangingPassword(false)
+    setPasswordLoading(true)
+
+    try {
+      // Вызов API для смены пароля
+      await changePassword(currentPassword, newPassword)
+
+      // Успешная смена пароля
+      setPasswordSuccess("Пароль успешно изменён!")
+
+      // Очистить поля
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+
+    } catch (err) {
+      console.error("Ошибка при смене пароля:", err)
+      setPasswordError(
+        err.response?.data ||
+          "Произошла ошибка при смене пароля. Пожалуйста, проверьте текущий пароль и попробуйте снова.",
+      )
+    } finally {
+      setPasswordLoading(false)
+    }
   }
 
   if (!token) {
@@ -73,10 +103,7 @@ export default function ProfilePage() {
             ) : error ? (
               <div className="error-message">
                 <p>{error}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="retry-button"
-                >
+                <button onClick={() => window.location.reload()} className="retry-button">
                   Попробовать снова
                 </button>
               </div>
@@ -105,28 +132,35 @@ export default function ProfilePage() {
                   </div>
                   <div className="info-item">
                     <span className="info-label">Дата рождения:</span>
-                    <span className="info-value">
-                      {new Date(profile.birthDate).toLocaleDateString('ru-RU')}
-                    </span>
+                    <span className="info-value">{new Date(profile.birthDate).toLocaleDateString("ru-RU")}</span>
                   </div>
                 </div>
 
                 <div className="change-password-section">
                   {!isChangingPassword ? (
-                    <button 
-                      className="change-password-button" 
-                      onClick={() => setIsChangingPassword(true)}
-                    >
+                    <button className="change-password-button" onClick={() => setIsChangingPassword(true)}>
                       Сменить пароль
                     </button>
                   ) : (
                     <div className="password-form">
+                      {passwordError && <div className="error-message">{passwordError}</div>}
+                      {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+
+                      <input
+                        type="password"
+                        placeholder="Текущий пароль"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="password-input"
+                        disabled={passwordLoading}
+                      />
                       <input
                         type="password"
                         placeholder="Новый пароль"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         className="password-input"
+                        disabled={passwordLoading}
                       />
                       <input
                         type="password"
@@ -134,17 +168,34 @@ export default function ProfilePage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="password-input"
+                        disabled={passwordLoading}
                       />
-                      <button 
-                        className="save-password-button"
-                        onClick={handleSavePassword}
-                      >
-                        Сохранить пароль
-                      </button>
+                      <div className="password-buttons">
+                        <button
+                          className="cancel-button"
+                          onClick={() => {
+                            setIsChangingPassword(false)
+                            setPasswordError("")
+                            setPasswordSuccess("")
+                            setCurrentPassword("")
+                            setNewPassword("")
+                            setConfirmPassword("")
+                          }}
+                          disabled={passwordLoading}
+                        >
+                          Отмена
+                        </button>
+                        <button
+                          className="save-password-button"
+                          onClick={handleSavePassword}
+                          disabled={passwordLoading}
+                        >
+                          {passwordLoading ? "Сохранение..." : "Сохранить пароль"}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
-
               </div>
             ) : (
               <div className="error-message">Данные профиля не найдены</div>

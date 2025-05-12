@@ -21,7 +21,6 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-
 // Обработка ответов и обновление токена
 api.interceptors.response.use(
   (response) => response,
@@ -30,12 +29,7 @@ api.interceptors.response.use(
     const { dispatch, getState } = store
     const { refreshToken, isRefreshing } = getState().auth
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      refreshToken &&
-      !isRefreshing
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry && refreshToken && !isRefreshing) {
       originalRequest._retry = true
       dispatch(setRefreshing(true))
 
@@ -45,7 +39,7 @@ api.interceptors.response.use(
         })
         const { accessToken, refreshToken: newRefreshToken } = response.data
         dispatch(setTokens({ accessToken, refreshToken: newRefreshToken }))
-        
+
         originalRequest.headers["Authorization"] = `Bearer ${accessToken}`
         return api(originalRequest)
       } catch (refreshError) {
@@ -57,7 +51,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error)
-  }
+  },
 )
 
 export const refreshTokens = () => {
@@ -84,13 +78,16 @@ export const registerUser = (userData) => {
 
 export const loginUser = (credentials) => {
   console.log("Logging in with credentials:", credentials)
-  return api.post("/auth/login", {
-    passport: credentials.passport,
-    password: credentials.password,
-  }).then((response) => {
-    const { accessToken, refreshToken } = response.data
-    store.dispatch(setTokens({ accessToken, refreshToken }))
-    return response})
+  return api
+    .post("/auth/login", {
+      passport: credentials.passport,
+      password: credentials.password,
+    })
+    .then((response) => {
+      const { accessToken, refreshToken } = response.data
+      store.dispatch(setTokens({ accessToken, refreshToken }))
+      return response
+    })
 }
 
 export const getUserInfo = () => {
@@ -98,8 +95,24 @@ export const getUserInfo = () => {
 }
 
 export const getProfile = () => {
-  return api.get("/api/profile/info");
+  return api.get("/api/profile/info")
 }
+
+export const changePassword = (currentPassword, newPassword) => {
+  console.log("Changing password")
+  return api.post("/auth/change-password", {
+    currentPassword,
+    newPassword,
+  })
+}
+
+export const sendPdfByEmail = (recordId, email) => {
+  return api.post("/pdf/send-by-email", {
+    recordId,
+    email,
+  })
+}
+
 
 export const getMedicalServices = () => {
   console.log("Fetching medical services")
@@ -115,8 +128,8 @@ export const getServiceForm = (serviceId) => {
 export const submitForm = (formData) => {
   console.log("Submitting form with data:", formData)
   return api.post("/api/services/submit", {
-    serviceId: formData.serviceId, 
-    formFields: formData.formFields 
+    serviceId: formData.serviceId,
+    formFields: formData.formFields,
   })
 }
 

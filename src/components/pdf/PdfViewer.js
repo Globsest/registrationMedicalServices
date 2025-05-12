@@ -1,23 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { sendPdfByEmail } from "../../services/api" // Импортируем новую функцию
 import "../../styles/PdfViewer.css"
 
-const PdfViewer = ({ pdfData, onClose }) => {
+const PdfViewer = ({ pdfData, onClose, recordId }) => {
   const [pdfUrl, setPdfUrl] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [email, setEmail] = useState("")
+  const [emailStatus, setEmailStatus] = useState("")
 
   useEffect(() => {
     if (pdfData) {
       try {
-        // Create a blob URL from the PDF data
         const blob = new Blob([pdfData], { type: "application/pdf" })
         const url = URL.createObjectURL(blob)
         setPdfUrl(url)
         setLoading(false)
 
-        // Clean up the URL when the component unmounts
         return () => {
           URL.revokeObjectURL(url)
         }
@@ -40,35 +41,38 @@ const PdfViewer = ({ pdfData, onClose }) => {
     }
   }
 
+  const handleSendEmail = async () => {
+    if (!email) return setEmailStatus("Введите email")
+    try {
+      const response = await sendPdfByEmail(recordId, email)
+      setEmailStatus(`Успешно отправлено на ${email}`)
+    } catch (err) {
+      console.error("Ошибка при отправке:", err)
+      setEmailStatus("Ошибка при отправке PDF. Попробуйте снова.")
+    }
+  }
+
   return (
     <div className="pdf-viewer-overlay">
       <div className="pdf-viewer-container">
         <div className="pdf-viewer-header">
           <h2>Просмотр документа</h2>
           <div className="pdf-viewer-controls">
-            <button onClick={downloadPdf} className="pdf-download-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2"
-              >
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              Скачать PDF
-            </button>
-            <button onClick={onClose} className="pdf-close-btn">
-              Закрыть
-            </button>
+            <button onClick={downloadPdf} className="pdf-download-btn">Скачать PDF</button>
+            <button onClick={onClose} className="pdf-close-btn">Закрыть</button>
           </div>
+        </div>
+
+        <div className="pdf-email-send">
+          <input
+            type="email"
+            placeholder="Введите email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="pdf-email-input"
+          />
+          <button onClick={handleSendEmail} className="pdf-email-btn">Отправить на Email</button>
+          {emailStatus && <p className="pdf-email-status">{emailStatus}</p>}
         </div>
 
         {loading ? (

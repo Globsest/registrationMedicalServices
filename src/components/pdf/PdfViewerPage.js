@@ -58,7 +58,7 @@ const PdfViewerPage = () => {
     )
   }
 
-  return <PdfViewer pdfData={pdfData} onClose={handleClose} />
+  return <PdfViewer pdfData={pdfData} onClose={handleClose} recordId={recordId} />
 }
 
 export default PdfViewerPage
